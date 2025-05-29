@@ -1,85 +1,79 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { db } from '../firebase';
+import { collection, getDocs, addDoc, deleteDoc, doc, query, where } from 'firebase/firestore';
+import { useAuth } from '../context/AuthContext';
+import CreateProjectForm from '../components/CreateProjectForm';
 
 const Dashboard = () => {
-    const navigate = useNavigate();
+    const { currentUser } = useAuth();
+    const [projects, setProjects] = useState([]);
+    const [showForm, setShowForm] = useState(false);
 
-    const [projects, setProjects] = useState([
-        {
-            id: 1,
-            address: '1981 ambassador st Philadelphia, PA, 19115',
-            company: 'Kelvan Group',
-            startDate: '2025-08-01',
-            endDate: '2025-09-15',
-            towerType: 'Self Support',
-            towerHeight: '127 ft',
-            projectFor: 'Verizon',
-            managingCompany: 'Kelvan Group',
-            rigger: 'Yauheni Butko',
-            pm: {
-                name: 'Aliaksabdr Duaiosd',
-                email: 'pm@example.com',
-                phone: '1234567890',
-                role: 'PM',
-                company: 'Kelvan Group',
-            },
-            cm: {
-                name: 'Asalam Maeuum',
-                email: 'cm@example.com',
-                phone: '0987654321',
-                role: 'CM',
-                company: 'Kelvan Group',
-            },
-            personnel: [
-                {
-                    name: 'Yauheni Butko',
-                    role: 'Crew Lead',
-                    company: 'Slu',
-                },
-                {
-                    name: 'Aliaksandr Shubich',
-                    role: 'Top Hand',
-                    company: 'Slu',
-                },
-            ],
-        },
-    ]);
+    const fetchProjects = async () => {
+        if (!currentUser) return;
+        const q = query(collection(db, 'projects'), where('userId', '==', currentUser.uid));
+        const snapshot = await getDocs(q);
+        const projectList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setProjects(projectList);
+    };
+
+    const handleDelete = async (id) => {
+        await deleteDoc(doc(db, 'projects', id));
+        fetchProjects();
+    };
+
+    useEffect(() => {
+        fetchProjects();
+    }, [currentUser]);
 
     return (
-        <div className="p-8 text-white bg-[#0d1117] min-h-screen">
+        <div className="bg-[#0d1117] text-white min-h-screen p-8">
             <h1 className="text-3xl font-bold mb-6">Projects</h1>
-            {projects.map((project, index) => (
-                <div key={index} className="bg-gray-800 p-4 rounded-lg shadow-md mb-6">
-                    <h3 className="text-xl font-bold text-white mb-2">{project.siteAddress}</h3>
-                    <p className="text-gray-400 text-sm">Company: {project.companyName}</p>
-                    <p className="text-gray-400 text-sm">Tower: {project.towerType}, {project.towerHeight}</p>
-                    <p className="text-gray-400 text-sm">Project For: {project.projectFor}</p>
-                    <p className="text-gray-400 text-sm">Dates: {project.startDate} – {project.endDate}</p>
 
-                    <div className="mt-4 text-sm text-white">
-                        <strong>Rigging Plans:</strong>
-                        {project.riggingPlans && project.riggingPlans.length > 0 ? (
-                            <ul className="list-disc list-inside text-green-400 mt-2">
-                                {project.riggingPlans.map((plan, i) => (
-                                    <li key={i}>
-                                        Config: {plan.config}, Gross Load: {plan.grossLoad} lbs, Tag Line Angle: {plan.tagAngle}°
-                                    </li>
-                                ))}
-                            </ul>
-                        ) : (
-                            <p className="text-gray-500 italic">No rigging plans yet.</p>
-                        )}
+            <div className="flex gap-4 mb-6">
+                <button
+                    onClick={() => setShowForm(!showForm)}
+                    className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700 transition"
+                >
+                    + Create Project
+                </button>
+                <button className="bg-indigo-500 px-4 py-2 rounded hover:bg-indigo-600 transition">📁 Rope Logs</button>
+                <button className="bg-purple-600 px-4 py-2 rounded hover:bg-purple-700 transition">📄 Certificates</button>
+            </div>
+
+            {showForm && (
+                <div className="mb-6">
+                    <CreateProjectForm onProjectCreated={fetchProjects} />
+                </div>
+            )}
+
+            {projects.map((project) => (
+                <div key={project.id} className="bg-[#111827] p-6 rounded-lg shadow-md mb-6">
+                    <p><strong>Address:</strong> {project.address}</p>
+                    <p><strong>Company:</strong> {project.company}</p>
+                    <p><strong>Rigger:</strong> {project.rigger}</p>
+                    <p><strong>PM:</strong> {project.pmName} ({project.pmEmail}, {project.pmPhone})</p>
+                    <p><strong>CM:</strong> {project.cmName} ({project.cmEmail}, {project.cmPhone})</p>
+                    <p><strong>Managing Company:</strong> {project.managingCompany}</p>
+                    <p><strong>Tower:</strong> {project.towerType}, {project.towerHeight}</p>
+                    <p><strong>Project For:</strong> {project.projectFor}</p>
+                    <p><strong>Dates:</strong> {project.startDate} to {project.endDate}</p>
+                    <p><strong>Tower Owner:</strong> {project.towerOwner}</p>
+
+                    <div className="mt-4 flex flex-wrap gap-2">
+                        <button className="bg-yellow-400 text-black px-3 py-2 rounded hover:bg-yellow-500">🛠 Create Rigging Plan</button>
+                        <button className="bg-red-600 px-3 py-2 rounded hover:bg-red-700">⚠️ Emergency Locator</button>
+                        <button className="bg-blue-600 px-3 py-2 rounded hover:bg-blue-700">📐 Sling Layout</button>
+                        <button className="bg-green-600 px-3 py-2 rounded hover:bg-green-700">📄 JSA creator</button>
+                        <button
+                            onClick={() => handleDelete(project.id)}
+                            className="ml-auto bg-red-500 hover:bg-red-700 px-4 py-2 rounded"
+                        >
+                            Delete
+                        </button>
                     </div>
-
-                    <button
-                        onClick={() => navigate(`/rigging/${index}`)}
-                        className="mt-3 bg-yellow-500 text-black px-4 py-2 rounded hover:bg-yellow-600 transition"
-                    >
-                        Create Rigging Plan
-                    </button>
                 </div>
             ))}
-
         </div>
     );
 };

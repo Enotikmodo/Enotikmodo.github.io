@@ -8,7 +8,7 @@ const Footer = () => {
                 {/* Logo + Creator */}
                 <div className="flex items-center gap-3">
                     <img
-                        src="../../public/buildrightacademy.png"
+                        src="/buildrightacademy.png" // без ../../public
                         alt="logo"
                         className="w-6 h-6"
                     />
@@ -25,8 +25,8 @@ const Footer = () => {
                 {/* Navigation */}
                 <div className="flex space-x-6 text-sm">
                     <Link to="/" className="hover:text-white transition">Home</Link>
-                    <a href="#features" className="hover:text-white transition">Features</a>
-                    <a href="#register" className="hover:text-white transition">Register</a>
+                    <Link to="/dashboard" className="hover:text-white transition">Dashboard</Link>
+                    <Link to="/register" className="hover:text-white transition">Register</Link>
                     <Link to="/contact" className="hover:text-white transition">Contact</Link>
                 </div>
 

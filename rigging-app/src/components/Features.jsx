@@ -2,20 +2,34 @@ import { motion } from "framer-motion";
 
 const features = [
     {
-        title: "Accurate Calculations",
-        description: "Lift force, tag angle, block configuration — all based on ANSI/TIA-322 industry standards."
+        icon: "📐",
+        title: "Rigging Plan Builder",
+        description: "Create detailed rigging plans with force and angle calculations based on ANSI/TIA-322."
     },
     {
-        title: "Team & Company Management",
-        description: "Create your company, add teams and track member certifications in one dashboard."
+        icon: "⚠️",
+        title: "Emergency Service Locator",
+        description: "Generate service location documents based on the tower address and coordinates."
     },
     {
-        title: "Project History",
-        description: "View current and completed tower projects, access past reports, and analyze performance."
+        icon: "📎",
+        title: "Sling Layout Estimator",
+        description: "Calculate optimal sling and tag locations for safe and balanced lifts."
     },
     {
-        title: "PDF Reports & Exports",
-        description: "Export rigging plans as professional PDF files with calculation breakdowns."
+        icon: "📄",
+        title: "Write JSA",
+        description: "Create job safety analyses for each project with reusable templates."
+    },
+    {
+        icon: "📁",
+        title: "Certificate Tracker",
+        description: "Monitor certification status and expiration for all crew members."
+    },
+    {
+        icon: "📝",
+        title: "Rope Logs",
+        description: "Maintain rigging rope logs and inspections per user."
     }
 ];
 
@@ -30,20 +44,21 @@ const Features = () => {
                     viewport={{ once: true }}
                     className="text-4xl font-bold mb-12"
                 >
-                    Why Choose Our App
+                    Useful Telecom Features – All in One Place
                 </motion.h2>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                     {features.map((feat, idx) => (
                         <motion.div
                             key={idx}
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
-                            transition={{ delay: idx * 0.2, duration: 0.5 }}
+                            transition={{ delay: idx * 0.15, duration: 0.4 }}
                             viewport={{ once: true }}
-                            className="bg-[#161b22] rounded-2xl p-6 text-left shadow-lg"
+                            className="bg-[#161b22] rounded-2xl p-6 text-left shadow-md hover:shadow-lg transition"
                         >
-                            <h3 className="text-xl font-semibold text-yellow-400 mb-2">{feat.title}</h3>
+                            <div className="text-3xl mb-2">{feat.icon}</div>
+                            <h3 className="text-xl font-semibold text-yellow-400 mb-1">{feat.title}</h3>
                             <p className="text-gray-400">{feat.description}</p>
                         </motion.div>
                     ))}
