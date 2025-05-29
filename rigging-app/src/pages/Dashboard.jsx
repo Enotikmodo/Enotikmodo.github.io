@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { db } from '../firebase';
-import { collection, getDocs, addDoc, deleteDoc, doc, query, where } from 'firebase/firestore';
+import { collection, getDocs, deleteDoc, doc, query, where } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
 import CreateProjectForm from '../components/CreateProjectForm';
 
@@ -8,6 +8,7 @@ const Dashboard = () => {
     const { currentUser } = useAuth();
     const [projects, setProjects] = useState([]);
     const [showForm, setShowForm] = useState(false);
+    const [editingProject, setEditingProject] = useState(null);
 
     const fetchProjects = async () => {
         if (!currentUser) return;
@@ -22,6 +23,16 @@ const Dashboard = () => {
         fetchProjects();
     };
 
+    const handleEditProject = (project) => {
+        setEditingProject(project);
+        setShowForm(true);
+    };
+
+    const handleCreateProject = () => {
+        setEditingProject(null);
+        setShowForm((prev) => !prev);
+    };
+
     useEffect(() => {
         fetchProjects();
     }, [currentUser]);
@@ -32,7 +43,7 @@ const Dashboard = () => {
 
             <div className="flex gap-4 mb-6">
                 <button
-                    onClick={() => setShowForm(!showForm)}
+                    onClick={handleCreateProject}
                     className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700 transition"
                 >
                     + Create Project
@@ -43,7 +54,12 @@ const Dashboard = () => {
 
             {showForm && (
                 <div className="mb-6">
-                    <CreateProjectForm onProjectCreated={fetchProjects} />
+                    <CreateProjectForm
+                        onProjectCreated={fetchProjects}
+                        editingProject={editingProject}
+                        setEditingProject={setEditingProject}
+                        closeForm={() => setShowForm(false)}
+                    />
                 </div>
             )}
 
@@ -65,12 +81,21 @@ const Dashboard = () => {
                         <button className="bg-red-600 px-3 py-2 rounded hover:bg-red-700">⚠️ Emergency Locator</button>
                         <button className="bg-blue-600 px-3 py-2 rounded hover:bg-blue-700">📐 Sling Layout</button>
                         <button className="bg-green-600 px-3 py-2 rounded hover:bg-green-700">📄 JSA creator</button>
-                        <button
-                            onClick={() => handleDelete(project.id)}
-                            className="ml-auto bg-red-500 hover:bg-red-700 px-4 py-2 rounded"
-                        >
-                            Delete
-                        </button>
+
+                        <div className="flex gap-3 mt-6 mx-auto">
+                            <button
+                                onClick={() => handleEditProject(project)}
+                                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-md transition"
+                            >
+                                <span>✏️</span> Edit Project
+                            </button>
+                            <button
+                                onClick={() => handleDelete(project.id)}
+                                className="flex items-center gap-2 bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-md transition"
+                            >
+                                <span>🗑️</span> Delete
+                            </button>
+                        </div>
                     </div>
                 </div>
             ))}
